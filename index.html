@@ -1,76 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>CVA Journey Tracker</title>
+    <title>CVA Journey Calendar</title>
     <meta charset="UTF-8">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5; 
-            line-height: 1.6; color: #333;
-        }
-        h1 { 
-            color: #1a365d; text-align: center; margin-bottom: 30px; 
-            font-size: 2em; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .milestone { 
-            background: white; border-left: 5px solid #4299e1; padding: 20px; 
-            margin: 20px 0; border-radius: 0 8px 8px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .completed { 
-            border-left-color: #48bb78; background: #f0fff4; 
-            transform: translateX(5px); transition: all 0.3s ease;
-        }
-        .milestone h3 { 
-            color: #2d3748; margin-bottom: 10px; font-size: 1.3em;
-        }
-        button { 
-            background: #4299e1; color: white; border: none; padding: 10px 20px; 
-            border-radius: 25px; cursor: pointer; font-weight: 600; 
-            transition: all 0.2s; margin-top: 10px;
-        }
-        button:hover { background: #3182ce; transform: translateY(-1px); }
-        .progress { font-weight: bold; color: #805ad5; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; background: #f5f5f5; line-height: 1.6; color: #333; }
+        h1 { color: #1a365d; text-align: center; margin-bottom: 30px; font-size: 2.2em; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 20px 0; }
+        .week-header { background: #4299e1; color: white; padding: 15px; text-align: center; font-weight: 600; border-radius: 8px 8px 0 0; }
+        .day { background: white; border-radius: 0 0 8px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; cursor: pointer; transition: all 0.3s; }
+        .day-header { background: #edf2f7; padding: 10px; font-weight: 600; text-align: center; border-bottom: 1px solid #e2e8f0; }
+        .day.complete .day-header { background: #48bb78; color: white; }
+        .tasks { padding: 15px; min-height: 120px; }
+        .task { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+        .task.complete { opacity: 0.7; text-decoration: line-through; color: #666; }
+        .task-checkbox { width: 20px; height: 20px; margin-right: 10px; cursor: pointer; }
+        .task.complete .task-checkbox { background: #48bb78; border-color: #48bb78; }
+        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 0.9em; }
+        .progress { font-weight: bold; color: #805ad5; text-align: center; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-    <h1>🧠 CVA Revalidatie Journey</h1>
-    <p class="progress">Patient Journey Tracker - PF7 EVL6 Innovatie</p>
-    
-    <div class="milestone completed" id="week1">
-        <h3>✅ Week 1: Intake Compleet</h3>
-        <p><strong>Krachtoefeningen</strong> starten (3x/dag, 10 reps)</p>
-    </div>
-    
-    <div class="milestone" id="week4">
-        <h3>Week 4: Poli-check</h3>
-        <p><strong>Traplopen oefenen</strong> (2x10 treden met hulp)</p>
-        <button onclick="completeMilestone('week4')">Markeer Voltooid</button>
-    </div>
-    
-    <div class="milestone" id="week8">
-        <h3>Week 8: Thuisfase</h3>
-        <p><strong>Wandelen 10min</strong> + familie melding</p>
-        <button onclick="completeMilestone('week8')">Markeer Voltooid</button>
-    </div>
-    
-    <div style="text-align: center; margin-top: 30px; color: #666; font-size: 0.9em;">
-        <p>🎯 EVL 6.1/6.2 - Patient Journey Theme PF7</p>
-    </div>
-
-    <script>
-        function completeMilestone(id) {
-            const milestone = document.getElementById(id);
-            milestone.classList.add('completed');
-            const h3 = milestone.querySelector('h3');
-            h3.innerHTML = '✅ ' + h3.innerText;
-            const btn = milestone.querySelector('button');
-            btn.style.background = '#48bb78';
-            btn.innerText = 'Gemarkeerd!';
-            btn.disabled = true;
-        }
-    </script>
-</body>
-</html>
+    <h1>🧠 CVA Revalid
