@@ -23,4 +23,135 @@
             margin-bottom: 20px;
             max-width: 100%; 
         }
-        .week-head
+        .week-header { 
+            background: #4299e1; color: white; padding: 15px; 
+            text-align: center; font-weight: 600; border-radius: 8px 8px 0 0;
+            grid-column: 1 / -1; margin-bottom: 10px;
+        }
+        .day-header { 
+            background: #edf2f7; color: #4a5568; padding: 12px 8px; 
+            text-align: center; font-weight: 600; font-size: 0.9em;
+            writing-mode: vertical-rl; text-orientation: mixed;
+        }
+        .day { 
+            background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            overflow: hidden; cursor: pointer; transition: all 0.3s; min-height: 140px;
+        }
+        .day:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+        .day-header-number { background: #4299e1; color: white; padding: 10px; font-weight: 700; font-size: 1.1em; }
+        .day.complete .day-header-number { background: #48bb78; }
+        .tasks { padding: 15px; }
+        .task { 
+            display: flex; align-items: center; padding: 10px 0; 
+            border-bottom: 1px solid #e2e8f0; cursor: pointer;
+        }
+        .task:last-child { border-bottom: none; }
+        .task.complete { opacity: 0.7; text-decoration: line-through; color: #666; }
+        .task-checkbox { 
+            width: 20px; height: 20px; border: 2px solid #cbd5e0; 
+            border-radius: 4px; margin-right: 12px; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .task.complete .task-checkbox { 
+            background: #48bb78; border-color: #48bb78; 
+        }
+        .task-checkbox::after {
+            content: '✔'; color: white; font-size: 12px; opacity: 0;
+        }
+        .task.complete .task-checkbox::after { opacity: 1; }
+        .progress { font-weight: bold; color: #805ad5; text-align: center; margin-bottom: 20px; font-size: 1.1em; }
+        .footer { text-align: center; margin-top: 40px; color: #666; font-size: 0.9em; padding: 20px; background: white; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>🧠 CVA Revalidatie Kalender</h1>
+    <p class="progress">Week 1-4 Patient Journey Tracker - PF7 EVL6 Innovatie</p>
+
+    <!-- Week 1 -->
+    <div class="week-container">
+        <div class="week-header">📅 Week 1: Krachtopbouw</div>
+        <div class="week-grid">
+            <div class="day-header">Ma</div><div class="day-header">Di</div><div class="day-header">Wo</div>
+            <div class="day-header">Do</div><div class="day-header">Vr</div><div class="day-header">Za</div><div class="day-header">Zo</div>
+            
+            <div class="day" onclick="toggleDay('ma1')">
+                <div class="day-header-number">1</div>
+                <div class="tasks">
+                    <div class="task" onclick="toggleTask(event, 'trap-ma1')">
+                        <span class="task-checkbox"></span>
+                        <span>🏃 Traplopen (10x)</span>
+                    </div>
+                    <div class="task" onclick="toggleTask(event, 'oefen-ma1')">
+                        <span class="task-checkbox"></span>
+                        <span>💪 Fysio oefeningen</span>
+                    </div>
+                    <div class="task" onclick="toggleTask(event, 'stappen-ma1')">
+                        <span class="task-checkbox"></span>
+                        <span>👟 Stappen (3000)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="day" onclick="toggleDay('di1')">
+                <div class="day-header-number">2</div>
+                <div class="tasks">
+                    <div class="task" onclick="toggleTask(event, 'trap-di1')">
+                        <span class="task-checkbox"></span>
+                        <span>🏃 Traplopen (12x)</span>
+                    </div>
+                    <div class="task" onclick="toggleTask(event, 'oefen-di1')">
+                        <span class="task-checkbox"></span>
+                        <span>💪 Fysio oefeningen</span>
+                    </div>
+                    <div class="task" onclick="toggleTask(event, 'stappen-di1')">
+                        <span class="task-checkbox"></span>
+                        <span>👟 Stappen (3500)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="day" onclick="toggleDay('wo1')">
+                <div class="day-header-number">3</div>
+                <div class="tasks">
+                    <div class="task" onclick="toggleTask(event, 'trap-wo1')">
+                        <span class="task-checkbox"></span>
+                        <span>🏃 Traplopen (12x)</span>
+                    </div>
+                    <div class="task" onclick="toggleTask(event, 'oefen-wo1')">
+                        <span class="task-checkbox"></span>
+                        <span>💪 Fysio oefeningen</span>
+                    </div>
+                    <div class="task" onclick="toggleTask(event, 'stappen-wo1')">
+                        <span class="task-checkbox"></span>
+                        <span>👟 Stappen (3500)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="day" onclick="toggleDay('do1')">
+                <div class="day-header-number">4</div>
+                <div class="tasks">
+                    <div class="task" onclick="toggleTask(event, 'trap-do1')">
+                        <span class="task-checkbox"></span>
+                        <span>🏃 Traplopen (15x)</span>
+                    </div>
+                    <div class="task" onclick="toggleTask(event, 'oefen-do1')">
+                        <span class="task-checkbox"></span>
+                        <span>💪 Fysio oefeningen</span>
+                    </div>
+                    <div class="task" onclick="toggleTask(event, 'stappen-do1')">
+                        <span class="task-checkbox"></span>
+                        <span>👟 Stappen (4000)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="day" onclick="toggleDay('vr1')">
+                <div class="day-header-number">5</div>
+                <div class="tasks">
+                    <div class="task" onclick="toggleTask(event, 'trap-vr1')">
+                        <span class="task-checkbox"></span>
+                        <span>🏃 Traplopen (15x)</span>
+                    </div>
+                    <div class="task" onclick="toggleTask(event
