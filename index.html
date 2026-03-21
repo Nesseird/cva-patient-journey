@@ -5,88 +5,89 @@
 <title>CVA Revalidatie Kalender</title>
 
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-    font-family: system-ui, sans-serif;
-    max-width: 1000px;
-    margin: auto;
+    font-family: system-ui;
     padding: 20px;
-    background: #f5f5f5;
+    background: #f0f4f8;
 }
 
 /* HEADER */
-h1 { text-align: center; margin-bottom: 10px; }
-.subtitle { text-align: center; margin-bottom: 20px; }
+h1 {
+    text-align: center;
+    font-size: 2.5rem;
+}
+
+.subtitle {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
 
 /* NAV */
 .nav {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 20px;
+    margin: 20px 0;
 }
 
 button {
-    padding: 10px 15px;
+    padding: 12px 20px;
+    font-size: 1rem;
+    background: #4299e1;
+    color: white;
     border: none;
-    background: #4299e1;
-    color: white;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-/* WEEK */
-.week-header {
-    background: #4299e1;
-    color: white;
-    padding: 12px;
-    text-align: center;
     border-radius: 8px;
-    margin-bottom: 10px;
+    cursor: pointer;
 }
 
 /* GRID */
 .grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
+    gap: 12px;
 }
 
 .day-header {
     text-align: center;
     font-weight: bold;
+    font-size: 1.1rem;
 }
 
 /* DAY */
 .day {
     background: white;
-    border-radius: 8px;
-    padding: 10px;
-    min-height: 130px;
-    cursor: pointer;
+    border-radius: 10px;
+    padding: 12px;
+    min-height: 150px;
+    transition: 0.3s;
 }
 
-.day-number {
-    font-weight: bold;
-    margin-bottom: 5px;
+.day.complete {
+    background: #d4edda;
 }
 
 /* TASK */
 .task {
-    font-size: 0.9em;
-    margin: 5px 0;
+    font-size: 1rem;
+    margin: 6px 0;
+    padding: 6px;
+    border-radius: 6px;
     cursor: pointer;
+    transition: 0.2s;
 }
 
 .task.complete {
+    background: #c6f6d5;
     text-decoration: line-through;
-    opacity: 0.6;
 }
 
 /* PROGRESS */
 .progress {
     text-align: center;
-    margin: 15px 0;
+    margin: 15px;
+    font-size: 1.2rem;
     font-weight: bold;
 }
 </style>
@@ -98,11 +99,9 @@ button {
 <div class="subtitle" id="phase"></div>
 
 <div class="nav">
-    <button onclick="prevWeek()">⬅ Vorige</button>
-    <button onclick="nextWeek()">Volgende ➡</button>
+<button onclick="prevWeek()">⬅</button>
+<button onclick="nextWeek()">➡</button>
 </div>
-
-<div class="week-header" id="weekTitle"></div>
 
 <div class="grid" id="headers"></div>
 <div class="grid" id="calendar"></div>
@@ -112,135 +111,86 @@ button {
 <script>
 const days = ["Ma","Di","Wo","Do","Vr","Za","Zo"];
 
+const baseTasks = {
+    early: ["Mobiliseren", "Zitten/staan oefenen", "ADL training"],
+    strength: ["Krachttraining (3x/dag)", "Balans", "Herhalen beweging"],
+    functional: ["Traplopen", "Lopen oefenen", "Transfer training"],
+    endurance: ["Wandelen 10-20 min", "Fietsen licht", "Dagelijkse activiteit"],
+    participation: ["Werk taken", "Zelfstandig plannen", "Sociale activiteit"]
+};
+
 const weeks = [
-{
-    title: "Week 1",
-    phase: "Intake → Krachtoefeningen starten (3x/dag)",
-    tasks: [
-        ["Krachtoefeningen", "Stappen 3000"],
-        ["Krachtoefeningen"],
-        ["Krachtoefeningen"],
-        ["Krachtoefeningen"],
-        ["Krachtoefeningen"],
-        ["Rust"],
-        ["Rust"]
-    ]
-},
-{
-    title: "Week 4",
-    phase: "Poli-check → Traplopen oefenen (80%)",
-    tasks: [
-        ["Traplopen"],
-        ["Traplopen"],
-        ["Traplopen"],
-        ["Traplopen"],
-        ["Traplopen"],
-        ["Rust"],
-        ["Rust"]
-    ]
-},
-{
-    title: "Week 8",
-    phase: "Thuisfase → Wandelen 10min + familie betrekken",
-    tasks: [
-        ["Wandelen 10 min"],
-        ["Wandelen 10 min"],
-        ["Wandelen 10 min"],
-        ["Wandelen 10 min"],
-        ["Wandelen 10 min"],
-        ["Familie activiteit"],
-        ["Rust"]
-    ]
-},
-{
-    title: "Week 12",
-    phase: "Afsluiting → Terug naar werk checklist",
-    tasks: [
-        ["Werk checklist"],
-        ["Werk checklist"],
-        ["Werk checklist"],
-        ["Werk checklist"],
-        ["Werk checklist"],
-        ["Evaluatie"],
-        ["Rust"]
-    ]
-}
+{phase:"Week 1-2: Mobilisatie", type:"early"},
+{phase:"Week 3-4: Kracht", type:"strength"},
+{phase:"Week 5-7: Functioneel", type:"functional"},
+{phase:"Week 8-10: Uithoudingsvermogen", type:"endurance"},
+{phase:"Week 11-12: Participatie", type:"participation"}
 ];
 
 let currentWeek = 0;
 let state = {};
 
 function render() {
-    document.getElementById("weekTitle").innerText = weeks[currentWeek].title;
     document.getElementById("phase").innerText = weeks[currentWeek].phase;
 
-    const headerDiv = document.getElementById("headers");
-    const calDiv = document.getElementById("calendar");
+    const header = document.getElementById("headers");
+    const cal = document.getElementById("calendar");
 
-    headerDiv.innerHTML = "";
-    calDiv.innerHTML = "";
+    header.innerHTML = "";
+    cal.innerHTML = "";
 
-    days.forEach(d => {
+    days.forEach(d=>{
         const el = document.createElement("div");
-        el.className = "day-header";
-        el.innerText = d;
-        headerDiv.appendChild(el);
+        el.className="day-header";
+        el.innerText=d;
+        header.appendChild(el);
     });
 
-    weeks[currentWeek].tasks.forEach((dayTasks, i) => {
+    for(let i=0;i<7;i++){
         const day = document.createElement("div");
-        day.className = "day";
+        day.className="day";
 
-        let html = `<div class="day-number">${i+1}</div>`;
+        let html = `<b>Dag ${i+1}</b>`;
 
-        dayTasks.forEach((task, tIndex) => {
-            const key = currentWeek + "-" + i + "-" + tIndex;
+        baseTasks[weeks[currentWeek].type].forEach((t,j)=>{
+            const key = currentWeek+"-"+i+"-"+j;
             const done = state[key];
 
-            html += `<div class="task ${done ? "complete":""}" 
-                onclick="toggleTask(event,'${key}')">${task}</div>`;
+            html += `<div class="task ${done?"complete":""}" 
+            onclick="toggleTask(event,'${key}')">${t}</div>`;
         });
 
         day.innerHTML = html;
-        calDiv.appendChild(day);
-    });
+        cal.appendChild(day);
+    }
 
     updateProgress();
 }
 
-function toggleTask(e, key) {
+function toggleTask(e,key){
     e.stopPropagation();
-    state[key] = !state[key];
+    state[key]=!state[key];
     render();
 }
 
-function updateProgress() {
-    const week = weeks[currentWeek];
-    let total = 0, done = 0;
+function updateProgress(){
+    let total=0, done=0;
 
-    week.tasks.forEach((d,i)=>{
-        d.forEach((t,j)=>{
-            total++;
-            if(state[currentWeek+"-"+i+"-"+j]) done++;
-        });
+    Object.keys(state).forEach(k=>{
+        total++;
+        if(state[k]) done++;
     });
 
-    const perc = total ? Math.round((done/total)*100) : 0;
-    document.getElementById("progress").innerText = "Progress: " + perc + "%";
+    const perc = total?Math.round(done/total*100):0;
+    document.getElementById("progress").innerText="Progress: "+perc+"%";
 }
 
-function nextWeek() {
-    if(currentWeek < weeks.length -1){
-        currentWeek++;
-        render();
-    }
+function nextWeek(){
+    if(currentWeek<weeks.length-1){currentWeek++;render();}
 }
 
-function prevWeek() {
-    if(currentWeek > 0){
-        currentWeek--;
-        render();
-    }
+function prevWeek(){
+    if(currentWeek>0){currentWeek--;render();}
 }
 
 render();
