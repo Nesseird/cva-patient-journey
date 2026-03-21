@@ -22,4 +22,81 @@
     </style>
 </head>
 <body>
-    <h1>🧠 CVA Revalid
+    <h1>🧠 CVA Revalidatie Kalender</h1>
+    <p class="progress">Patient Journey Tracker - PF7 EVL6 Innovatie</p>
+
+    <div class="week-grid" id="week1">
+        <div class="week-header">Week 1</div>
+        <div class="day-header">Ma</div>
+        <div class="day-header">Di</div>
+        <div class="day-header">Wo</div>
+        <div class="day-header">Do</div>
+        <div class="day-header">Vr</div>
+        <div class="day-header">Za</div>
+        <div class="day-header">Zo</div>
+        
+        <div class="day" onclick="toggleDay('ma1')">
+            <div class="day-header">1</div>
+            <div class="tasks">
+                <div class="task" id="trap-ma1">
+                    <span class="task-checkbox" onclick="toggleTask(event, 'trap-ma1')"></span>
+                    <span>Traplopen (10x)</span>
+                </div>
+                <div class="task" id="oefen-ma1">
+                    <span class="task-checkbox" onclick="toggleTask(event, 'oefen-ma1')"></span>
+                    <span>Fysio oefeningen</span>
+                </div>
+                <div class="task" id="stappen-ma1">
+                    <span class="task-checkbox" onclick="toggleTask(event, 'stappen-ma1')"></span>
+                    <span>Stappendoel (3000)</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="day" onclick="toggleDay('di1')">
+            <div class="day-header">2</div>
+            <div class="tasks">
+                <div class="task" id="trap-di1">
+                    <span class="task-checkbox" onclick="toggleTask(event, 'trap-di1')"></span>
+                    <span>Traplopen (10x)</span>
+                </div>
+                <div class="task" id="oefen-di1">
+                    <span class="task-checkbox" onclick="toggleTask(event, 'oefen-di1')"></span>
+                    <span>Fysio oefeningen</span>
+                </div>
+                <div class="task" id="stappen-di1">
+                    <span class="task-checkbox" onclick="toggleTask(event, 'stappen-di1')"></span>
+                    <span>Stappendoel (3000)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px; color: #666; font-size: 0.9em;">
+        <p>🎯 EVL 6.1/6.2 - Patient Journey Theme PF7</p>
+    </div>
+
+    <script>
+        function toggleTask(event, taskId) {
+            event.stopPropagation();
+            const task = document.getElementById(taskId);
+            task.classList.toggle('complete');
+            checkDayComplete(taskId.split('-')[1].slice(0,-1));
+        }
+
+        function toggleDay(dayId) {
+            const day = document.querySelector(`[onclick="toggleDay('${dayId}')"]`);
+            day.classList.toggle('complete');
+        }
+
+        function checkDayComplete(dayPrefix) {
+            const tasks = document.querySelectorAll(`[id*="${dayPrefix}-"]`);
+            const allComplete = Array.from(tasks).every(task => task.classList.contains('complete'));
+            if (allComplete) {
+                const day = document.querySelector(`[onclick="toggleDay('${dayPrefix}')"]`);
+                day.classList.add('complete');
+            }
+        }
+    </script>
+</body>
+</html>
