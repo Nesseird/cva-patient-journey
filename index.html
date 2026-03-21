@@ -2,89 +2,80 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<title>CVA Journey Calendar</title>
+<title>CVA Revalidatie Kalender</title>
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-body { 
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-    max-width: 900px; 
-    margin: 0 auto; 
-    padding: 20px; 
-    background: #f5f5f5; 
+body {
+    font-family: system-ui, sans-serif;
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px;
+    background: #f5f5f5;
 }
 
-h1 { 
-    text-align: center; 
-    margin-bottom: 20px; 
-}
+/* HEADER */
+h1 { text-align: center; margin-bottom: 10px; }
+.subtitle { text-align: center; margin-bottom: 20px; }
 
-.progress {
-    text-align: center;
+/* NAV */
+.nav {
+    display: flex;
+    justify-content: space-between;
     margin-bottom: 20px;
-    font-weight: bold;
+}
+
+button {
+    padding: 10px 15px;
+    border: none;
+    background: #4299e1;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
 }
 
 /* WEEK */
-.week-container { margin: 30px 0; }
-
 .week-header {
     background: #4299e1;
     color: white;
-    padding: 15px;
+    padding: 12px;
     text-align: center;
     border-radius: 8px;
     margin-bottom: 10px;
 }
 
-/* HEADERS */
-.week-grid {
+/* GRID */
+.grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 10px;
 }
 
 .day-header {
-    background: #edf2f7;
     text-align: center;
-    padding: 10px;
     font-weight: bold;
 }
 
-/* DAYS */
+/* DAY */
 .day {
     background: white;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    cursor: pointer;
-}
-
-.day-header-number {
-    background: #4299e1;
-    color: white;
-    padding: 8px;
-    font-weight: bold;
-}
-
-.day.complete .day-header-number {
-    background: #48bb78;
-}
-
-.tasks {
     padding: 10px;
-}
-
-.task {
-    display: flex;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
+    min-height: 130px;
     cursor: pointer;
 }
 
-.task:last-child {
-    border-bottom: none;
+.day-number {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* TASK */
+.task {
+    font-size: 0.9em;
+    margin: 5px 0;
+    cursor: pointer;
 }
 
 .task.complete {
@@ -92,15 +83,11 @@ h1 {
     opacity: 0.6;
 }
 
-.task-checkbox {
-    width: 18px;
-    height: 18px;
-    border: 2px solid #ccc;
-    margin-right: 10px;
-}
-
-.task.complete .task-checkbox {
-    background: #48bb78;
+/* PROGRESS */
+.progress {
+    text-align: center;
+    margin: 15px 0;
+    font-weight: bold;
 }
 </style>
 </head>
@@ -108,65 +95,155 @@ h1 {
 <body>
 
 <h1>🧠 CVA Revalidatie Kalender</h1>
-<p class="progress">Week 1 - Krachtopbouw</p>
+<div class="subtitle" id="phase"></div>
 
-<div class="week-container">
-
-    <div class="week-header">Week 1</div>
-
-    <!-- HEADERS -->
-    <div class="week-grid">
-        <div class="day-header">Ma</div>
-        <div class="day-header">Di</div>
-        <div class="day-header">Wo</div>
-        <div class="day-header">Do</div>
-        <div class="day-header">Vr</div>
-        <div class="day-header">Za</div>
-        <div class="day-header">Zo</div>
-    </div>
-
-    <!-- DAYS -->
-    <div class="week-grid">
-
-        <div class="day" onclick="toggleDay(this)">
-            <div class="day-header-number">1</div>
-            <div class="tasks">
-                <div class="task" onclick="toggleTask(event, this)">
-                    <div class="task-checkbox"></div>
-                    Traplopen (10x)
-                </div>
-                <div class="task" onclick="toggleTask(event, this)">
-                    <div class="task-checkbox"></div>
-                    Fysio oefeningen
-                </div>
-            </div>
-        </div>
-
-        <div class="day" onclick="toggleDay(this)">
-            <div class="day-header-number">2</div>
-            <div class="tasks">
-                <div class="task" onclick="toggleTask(event, this)">
-                    <div class="task-checkbox"></div>
-                    Traplopen (12x)
-                </div>
-            </div>
-        </div>
-
-        <!-- Voeg hier je andere dagen toe -->
-
-    </div>
-
+<div class="nav">
+    <button onclick="prevWeek()">⬅ Vorige</button>
+    <button onclick="nextWeek()">Volgende ➡</button>
 </div>
 
+<div class="week-header" id="weekTitle"></div>
+
+<div class="grid" id="headers"></div>
+<div class="grid" id="calendar"></div>
+
+<div class="progress" id="progress"></div>
+
 <script>
-function toggleTask(event, el) {
-    event.stopPropagation(); // voorkomt dat day ook toggled
-    el.classList.toggle("complete");
+const days = ["Ma","Di","Wo","Do","Vr","Za","Zo"];
+
+const weeks = [
+{
+    title: "Week 1",
+    phase: "Intake → Krachtoefeningen starten (3x/dag)",
+    tasks: [
+        ["Krachtoefeningen", "Stappen 3000"],
+        ["Krachtoefeningen"],
+        ["Krachtoefeningen"],
+        ["Krachtoefeningen"],
+        ["Krachtoefeningen"],
+        ["Rust"],
+        ["Rust"]
+    ]
+},
+{
+    title: "Week 4",
+    phase: "Poli-check → Traplopen oefenen (80%)",
+    tasks: [
+        ["Traplopen"],
+        ["Traplopen"],
+        ["Traplopen"],
+        ["Traplopen"],
+        ["Traplopen"],
+        ["Rust"],
+        ["Rust"]
+    ]
+},
+{
+    title: "Week 8",
+    phase: "Thuisfase → Wandelen 10min + familie betrekken",
+    tasks: [
+        ["Wandelen 10 min"],
+        ["Wandelen 10 min"],
+        ["Wandelen 10 min"],
+        ["Wandelen 10 min"],
+        ["Wandelen 10 min"],
+        ["Familie activiteit"],
+        ["Rust"]
+    ]
+},
+{
+    title: "Week 12",
+    phase: "Afsluiting → Terug naar werk checklist",
+    tasks: [
+        ["Werk checklist"],
+        ["Werk checklist"],
+        ["Werk checklist"],
+        ["Werk checklist"],
+        ["Werk checklist"],
+        ["Evaluatie"],
+        ["Rust"]
+    ]
+}
+];
+
+let currentWeek = 0;
+let state = {};
+
+function render() {
+    document.getElementById("weekTitle").innerText = weeks[currentWeek].title;
+    document.getElementById("phase").innerText = weeks[currentWeek].phase;
+
+    const headerDiv = document.getElementById("headers");
+    const calDiv = document.getElementById("calendar");
+
+    headerDiv.innerHTML = "";
+    calDiv.innerHTML = "";
+
+    days.forEach(d => {
+        const el = document.createElement("div");
+        el.className = "day-header";
+        el.innerText = d;
+        headerDiv.appendChild(el);
+    });
+
+    weeks[currentWeek].tasks.forEach((dayTasks, i) => {
+        const day = document.createElement("div");
+        day.className = "day";
+
+        let html = `<div class="day-number">${i+1}</div>`;
+
+        dayTasks.forEach((task, tIndex) => {
+            const key = currentWeek + "-" + i + "-" + tIndex;
+            const done = state[key];
+
+            html += `<div class="task ${done ? "complete":""}" 
+                onclick="toggleTask(event,'${key}')">${task}</div>`;
+        });
+
+        day.innerHTML = html;
+        calDiv.appendChild(day);
+    });
+
+    updateProgress();
 }
 
-function toggleDay(el) {
-    el.classList.toggle("complete");
+function toggleTask(e, key) {
+    e.stopPropagation();
+    state[key] = !state[key];
+    render();
 }
+
+function updateProgress() {
+    const week = weeks[currentWeek];
+    let total = 0, done = 0;
+
+    week.tasks.forEach((d,i)=>{
+        d.forEach((t,j)=>{
+            total++;
+            if(state[currentWeek+"-"+i+"-"+j]) done++;
+        });
+    });
+
+    const perc = total ? Math.round((done/total)*100) : 0;
+    document.getElementById("progress").innerText = "Progress: " + perc + "%";
+}
+
+function nextWeek() {
+    if(currentWeek < weeks.length -1){
+        currentWeek++;
+        render();
+    }
+}
+
+function prevWeek() {
+    if(currentWeek > 0){
+        currentWeek--;
+        render();
+    }
+}
+
+render();
 </script>
 
 </body>
