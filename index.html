@@ -11,12 +11,15 @@ let currentWeek = 0;
 let state = {};
 let ratings = {};
 let streak = 0;
-let completedDays = new Set(); // voorkomt dubbele streak gain
+let completedDays = new Set();
 
 function render() {
-    document.getElementById("phase").innerText = weeks[currentWeek].phase;
-
+    const phaseEl = document.getElementById("phase");
     const cal = document.getElementById("calendar");
+
+    if(!phaseEl || !cal) return; // voorkomt crash
+
+    phaseEl.innerText = weeks[currentWeek].phase;
     cal.innerHTML = "";
 
     for(let i=0;i<7;i++){
@@ -25,7 +28,10 @@ function render() {
         day.className = "day";
 
         let allDone = true;
-        let html = `<b>Dag ${i+1}</b>`;
+
+        const title = document.createElement("b");
+        title.innerText = "Dag " + (i+1);
+        day.appendChild(title);
 
         weeks[currentWeek].tasks.forEach((t,j)=>{
             const key = currentWeek+"-"+i+"-"+j;
@@ -33,45 +39,53 @@ function render() {
 
             if(!done) allDone = false;
 
-            html += `
-            <div class="task ${done?"complete":""}" onclick="toggleTask('${key}', ${i})">
-                ${t}
-                <div class="rating">
-                    Moeite:
-                    ${renderEmoji(key,1,"🙂")}
-                    ${renderEmoji(key,2,"😐")}
-                    ${renderEmoji(key,3,"😓")}
-                </div>
-            </div>`;
+            const task = document.createElement("div");
+            task.className = "task " + (done ? "complete" : "");
+            task.innerText = t;
+
+            task.onclick = () => {
+                state[key] = !state[key];
+                checkDayCompletion(i);
+                render();
+            };
+
+            const ratingDiv = document.createElement("div");
+            ratingDiv.innerText = "Moeite: ";
+
+            ["🙂","😐","😓"].forEach((emoji,idx)=>{
+                const span = document.createElement("span");
+                span.innerText = emoji;
+                span.style.cursor = "pointer";
+                span.style.marginLeft = "5px";
+
+                if(ratings[key] === idx+1){
+                    span.style.fontWeight = "bold";
+                } else {
+                    span.style.opacity = "0.5";
+                }
+
+                span.onclick = (e) => {
+                    e.stopPropagation();
+                    ratings[key] = idx+1;
+                    render();
+                };
+
+                ratingDiv.appendChild(span);
+            });
+
+            task.appendChild(ratingDiv);
+            day.appendChild(task);
         });
 
         if(allDone && weeks[currentWeek].tasks.length > 0){
             day.classList.add("complete");
         }
 
-        day.innerHTML = html;
         cal.appendChild(day);
     }
 
     updateProgress();
     document.getElementById("streak").innerText = "🔥 Streak: " + streak + " dagen";
-}
-
-function renderEmoji(key, value, emoji){
-    const selected = ratings[key] == value ? "font-weight:bold;" : "opacity:0.5;";
-    return `<span style="cursor:pointer; ${selected}" onclick="rate(event,'${key}',${value})">${emoji}</span>`;
-}
-
-function toggleTask(key, dayIndex){
-    state[key] = !state[key];
-    checkDayCompletion(dayIndex);
-    render();
-}
-
-function rate(e,key,value){
-    e.stopPropagation();
-    ratings[key] = value;
-    render();
 }
 
 function checkDayCompletion(dayIndex){
@@ -113,5 +127,5 @@ function prevWeek(){
     }
 }
 
-render();
+window.onload = render;
 </script>
