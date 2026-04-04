@@ -1,117 +1,3 @@
-<!DOCTYPE html>
-<html lang="nl">
-<head>
-<meta charset="UTF-8">
-<title>CVA Journey App</title>
-
-<style>
-body {
-    font-family: system-ui;
-    margin: 0;
-    padding: 20px;
-    background: #eef2f7;
-}
-
-/* INTRO */
-.intro {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
-
-/* NAV */
-.nav {
-    display: flex;
-    justify-content: space-between;
-    margin: 15px 0;
-}
-
-button {
-    padding: 10px 15px;
-    border: none;
-    background: #3182ce;
-    color: white;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-/* GRID */
-.grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
-}
-
-.day {
-    background: white;
-    padding: 10px;
-    border-radius: 8px;
-    min-height: 140px;
-}
-
-.day.complete {
-    background: #d4edda;
-}
-
-/* TASK */
-.task {
-    padding: 6px;
-    margin: 5px 0;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.task.complete {
-    background: #c6f6d5;
-}
-
-/* REFLECTION */
-.rating {
-    font-size: 0.8rem;
-}
-
-/* STREAK */
-.streak {
-    text-align: center;
-    font-weight: bold;
-    margin: 10px;
-}
-
-/* PROGRESS */
-.progress {
-    text-align: center;
-    margin: 10px;
-    font-weight: bold;
-}
-</style>
-</head>
-
-<body>
-
-<div class="intro">
-    <h2>🧠 CVA Journey App</h2>
-    <p>
-        Deze app helpt je stap voor stap herstellen na een CVA. 
-        Je werkt dagelijks aan oefeningen die je helpen weer zelfstandig te worden 
-        in het dagelijks leven (ADL).
-    </p>
-    <p><b>Doel:</b> herstel, zelfstandigheid en voorkomen van nieuwe klachten.</p>
-</div>
-
-<div class="streak" id="streak"></div>
-
-<div class="nav">
-<button onclick="prevWeek()">⬅</button>
-<button onclick="nextWeek()">➡</button>
-</div>
-
-<h3 id="phase"></h3>
-
-<div class="grid" id="calendar"></div>
-
-<div class="progress" id="progress"></div>
-
 <script>
 const weeks = [
 {phase:"Week 1-2: Mobilisatie", tasks:["Mobiliseren","Zitten/staan","ADL"]},
@@ -125,6 +11,7 @@ let currentWeek = 0;
 let state = {};
 let ratings = {};
 let streak = 0;
+let completedDays = new Set(); // voorkomt dubbele streak gain
 
 function render() {
     document.getElementById("phase").innerText = weeks[currentWeek].phase;
@@ -133,30 +20,34 @@ function render() {
     cal.innerHTML = "";
 
     for(let i=0;i<7;i++){
+        const dayKey = currentWeek+"-"+i;
         const day = document.createElement("div");
         day.className = "day";
 
+        let allDone = true;
         let html = `<b>Dag ${i+1}</b>`;
 
         weeks[currentWeek].tasks.forEach((t,j)=>{
             const key = currentWeek+"-"+i+"-"+j;
             const done = state[key];
 
+            if(!done) allDone = false;
+
             html += `
-            <div class="task ${done?"complete":""}" 
-            onclick="toggleTask('${key}')">
+            <div class="task ${done?"complete":""}" onclick="toggleTask('${key}', ${i})">
                 ${t}
                 <div class="rating">
-                    Moeite: 
-                    <select onchange="rate(event,'${key}')">
-                        <option value="">-</option>
-                        <option value="1">🙂</option>
-                        <option value="2">😐</option>
-                        <option value="3">😓</option>
-                    </select>
+                    Moeite:
+                    ${renderEmoji(key,1,"🙂")}
+                    ${renderEmoji(key,2,"😐")}
+                    ${renderEmoji(key,3,"😓")}
                 </div>
             </div>`;
         });
+
+        if(allDone && weeks[currentWeek].tasks.length > 0){
+            day.classList.add("complete");
+        }
 
         day.innerHTML = html;
         cal.appendChild(day);
@@ -166,14 +57,34 @@ function render() {
     document.getElementById("streak").innerText = "🔥 Streak: " + streak + " dagen";
 }
 
-function toggleTask(key){
+function renderEmoji(key, value, emoji){
+    const selected = ratings[key] == value ? "font-weight:bold;" : "opacity:0.5;";
+    return `<span style="cursor:pointer; ${selected}" onclick="rate(event,'${key}',${value})">${emoji}</span>`;
+}
+
+function toggleTask(key, dayIndex){
     state[key] = !state[key];
-    updateStreak();
+    checkDayCompletion(dayIndex);
     render();
 }
 
-function rate(e,key){
-    ratings[key] = e.target.value;
+function rate(e,key,value){
+    e.stopPropagation();
+    ratings[key] = value;
+    render();
+}
+
+function checkDayCompletion(dayIndex){
+    const dayKey = currentWeek+"-"+dayIndex;
+
+    const allDone = weeks[currentWeek].tasks.every((_,j)=>{
+        return state[currentWeek+"-"+dayIndex+"-"+j];
+    });
+
+    if(allDone && !completedDays.has(dayKey)){
+        streak++;
+        completedDays.add(dayKey);
+    }
 }
 
 function updateProgress(){
@@ -186,10 +97,6 @@ function updateProgress(){
 
     const perc = total?Math.round(done/total*100):0;
     document.getElementById("progress").innerText="Progress: "+perc+"%";
-}
-
-function updateStreak(){
-    streak++;
 }
 
 function nextWeek(){
@@ -208,6 +115,3 @@ function prevWeek(){
 
 render();
 </script>
-
-</body>
-</html>
