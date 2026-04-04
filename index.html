@@ -2,43 +2,37 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<title>CVA Revalidatie Kalender</title>
+<title>CVA Journey App</title>
 
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
 body {
     font-family: system-ui;
+    margin: 0;
     padding: 20px;
-    background: #f0f4f8;
+    background: #eef2f7;
 }
 
-/* HEADER */
-h1 {
-    text-align: center;
-    font-size: 2.5rem;
-}
-
-.subtitle {
-    text-align: center;
+/* INTRO */
+.intro {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
     margin-bottom: 20px;
-    font-size: 1.2rem;
 }
 
 /* NAV */
 .nav {
     display: flex;
     justify-content: space-between;
-    margin: 20px 0;
+    margin: 15px 0;
 }
 
 button {
-    padding: 12px 20px;
-    font-size: 1rem;
-    background: #4299e1;
-    color: white;
+    padding: 10px 15px;
     border: none;
-    border-radius: 8px;
+    background: #3182ce;
+    color: white;
+    border-radius: 6px;
     cursor: pointer;
 }
 
@@ -46,22 +40,14 @@ button {
 .grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 12px;
+    gap: 10px;
 }
 
-.day-header {
-    text-align: center;
-    font-weight: bold;
-    font-size: 1.1rem;
-}
-
-/* DAY */
 .day {
     background: white;
-    border-radius: 10px;
-    padding: 12px;
-    min-height: 150px;
-    transition: 0.3s;
+    padding: 10px;
+    border-radius: 8px;
+    min-height: 140px;
 }
 
 .day.complete {
@@ -70,24 +56,32 @@ button {
 
 /* TASK */
 .task {
-    font-size: 1rem;
-    margin: 6px 0;
     padding: 6px;
+    margin: 5px 0;
     border-radius: 6px;
     cursor: pointer;
-    transition: 0.2s;
 }
 
 .task.complete {
     background: #c6f6d5;
-    text-decoration: line-through;
+}
+
+/* REFLECTION */
+.rating {
+    font-size: 0.8rem;
+}
+
+/* STREAK */
+.streak {
+    text-align: center;
+    font-weight: bold;
+    margin: 10px;
 }
 
 /* PROGRESS */
 .progress {
     text-align: center;
-    margin: 15px;
-    font-size: 1.2rem;
+    margin: 10px;
     font-weight: bold;
 }
 </style>
@@ -95,69 +89,73 @@ button {
 
 <body>
 
-<h1>🧠 CVA Revalidatie Kalender</h1>
-<div class="subtitle" id="phase"></div>
+<div class="intro">
+    <h2>🧠 CVA Journey App</h2>
+    <p>
+        Deze app helpt je stap voor stap herstellen na een CVA. 
+        Je werkt dagelijks aan oefeningen die je helpen weer zelfstandig te worden 
+        in het dagelijks leven (ADL).
+    </p>
+    <p><b>Doel:</b> herstel, zelfstandigheid en voorkomen van nieuwe klachten.</p>
+</div>
+
+<div class="streak" id="streak"></div>
 
 <div class="nav">
 <button onclick="prevWeek()">⬅</button>
 <button onclick="nextWeek()">➡</button>
 </div>
 
-<div class="grid" id="headers"></div>
+<h3 id="phase"></h3>
+
 <div class="grid" id="calendar"></div>
 
 <div class="progress" id="progress"></div>
 
 <script>
-const days = ["Ma","Di","Wo","Do","Vr","Za","Zo"];
-
-const baseTasks = {
-    early: ["Mobiliseren", "Zitten/staan oefenen", "ADL training"],
-    strength: ["Krachttraining (3x/dag)", "Balans", "Herhalen beweging"],
-    functional: ["Traplopen", "Lopen oefenen", "Transfer training"],
-    endurance: ["Wandelen 10-20 min", "Fietsen licht", "Dagelijkse activiteit"],
-    participation: ["Werk taken", "Zelfstandig plannen", "Sociale activiteit"]
-};
-
 const weeks = [
-{phase:"Week 1-2: Mobilisatie", type:"early"},
-{phase:"Week 3-4: Kracht", type:"strength"},
-{phase:"Week 5-7: Functioneel", type:"functional"},
-{phase:"Week 8-10: Uithoudingsvermogen", type:"endurance"},
-{phase:"Week 11-12: Participatie", type:"participation"}
+{phase:"Week 1-2: Mobilisatie", tasks:["Mobiliseren","Zitten/staan","ADL"]},
+{phase:"Week 3-4: Kracht", tasks:["Kracht","Balans","Herhaling"]},
+{phase:"Week 5-7: Functioneel", tasks:["Traplopen","Lopen","Transfers"]},
+{phase:"Week 8-10: Uithoudingsvermogen", tasks:["Wandelen","Fietsen","Activiteit"]},
+{phase:"Week 11-12: Participatie", tasks:["Werk","Planning","Sociaal"]}
 ];
 
 let currentWeek = 0;
 let state = {};
+let ratings = {};
+let streak = 0;
 
 function render() {
     document.getElementById("phase").innerText = weeks[currentWeek].phase;
 
-    const header = document.getElementById("headers");
     const cal = document.getElementById("calendar");
-
-    header.innerHTML = "";
     cal.innerHTML = "";
-
-    days.forEach(d=>{
-        const el = document.createElement("div");
-        el.className="day-header";
-        el.innerText=d;
-        header.appendChild(el);
-    });
 
     for(let i=0;i<7;i++){
         const day = document.createElement("div");
-        day.className="day";
+        day.className = "day";
 
         let html = `<b>Dag ${i+1}</b>`;
 
-        baseTasks[weeks[currentWeek].type].forEach((t,j)=>{
+        weeks[currentWeek].tasks.forEach((t,j)=>{
             const key = currentWeek+"-"+i+"-"+j;
             const done = state[key];
 
-            html += `<div class="task ${done?"complete":""}" 
-            onclick="toggleTask(event,'${key}')">${t}</div>`;
+            html += `
+            <div class="task ${done?"complete":""}" 
+            onclick="toggleTask('${key}')">
+                ${t}
+                <div class="rating">
+                    Moeite: 
+                    <select onchange="rate(event,'${key}')">
+                        <option value="">-</option>
+                        <option value="1">🙂</option>
+                        <option value="2">😐</option>
+                        <option value="3">😓</option>
+                    </select>
+                </div>
+            </div>`;
         });
 
         day.innerHTML = html;
@@ -165,12 +163,17 @@ function render() {
     }
 
     updateProgress();
+    document.getElementById("streak").innerText = "🔥 Streak: " + streak + " dagen";
 }
 
-function toggleTask(e,key){
-    e.stopPropagation();
-    state[key]=!state[key];
+function toggleTask(key){
+    state[key] = !state[key];
+    updateStreak();
     render();
+}
+
+function rate(e,key){
+    ratings[key] = e.target.value;
 }
 
 function updateProgress(){
@@ -185,12 +188,22 @@ function updateProgress(){
     document.getElementById("progress").innerText="Progress: "+perc+"%";
 }
 
+function updateStreak(){
+    streak++;
+}
+
 function nextWeek(){
-    if(currentWeek<weeks.length-1){currentWeek++;render();}
+    if(currentWeek < weeks.length-1){
+        currentWeek++;
+        render();
+    }
 }
 
 function prevWeek(){
-    if(currentWeek>0){currentWeek--;render();}
+    if(currentWeek > 0){
+        currentWeek--;
+        render();
+    }
 }
 
 render();
