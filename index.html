@@ -17,7 +17,7 @@ function render() {
     const phaseEl = document.getElementById("phase");
     const cal = document.getElementById("calendar");
 
-    if(!phaseEl || !cal) return; // voorkomt crash
+    if(!phaseEl || !cal) return; //
 
     phaseEl.innerText = weeks[currentWeek].phase;
     cal.innerHTML = "";
