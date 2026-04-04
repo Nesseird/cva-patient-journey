@@ -11,10 +11,19 @@ body {
     margin: 0;
     padding: 20px;
     font-size: 18px;
+    background-color: #f7f9fb;
 }
 
 h1 {
     margin-bottom: 10px;
+}
+
+.intro {
+    background-color: #e3f2fd;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    line-height: 1.6;
 }
 
 #calendar {
@@ -24,9 +33,11 @@ h1 {
 }
 
 .day {
-    border: 2px solid #ccc;
+    border: 2px solid #d0d7de;
     padding: 15px;
-    border-radius: 10px;
+    border-radius: 12px;
+    background-color: white;
+    transition: 0.2s;
 }
 
 .day.complete {
@@ -34,11 +45,16 @@ h1 {
 }
 
 .task {
-    padding: 8px;
-    margin: 6px 0;
-    border-radius: 6px;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 8px;
     cursor: pointer;
-    background-color: #f1f1f1;
+    background-color: #eef3f8;
+    transition: 0.2s;
+}
+
+.task:hover {
+    background-color: #dde7f0;
 }
 
 .task.complete {
@@ -64,6 +80,19 @@ button {
     font-size: 16px;
     margin-right: 10px;
     cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background-color: #1976d2;
+    color: white;
+    transition: 0.2s;
+}
+
+button:hover {
+    background-color: #1565c0;
+}
+
+#progress, #streak {
+    font-weight: bold;
 }
 </style>
 </head>
@@ -71,6 +100,13 @@ button {
 <body>
 
 <h1 id="phase"></h1>
+
+<div class="intro">
+    <strong>Wat is dit?</strong><br>
+    Deze app helpt je stap voor stap herstellen na een CVA.<br>
+    Je werkt dagelijks aan oefeningen die je helpen weer zelfstandig te worden 
+    in het dagelijks leven (ADL).
+</div>
 
 <div class="controls">
     <button onclick="prevWeek()">← Vorige</button>
