@@ -3,360 +3,252 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CVA Journey App</title>
+<title>CVA Revalidatie Planner</title>
 
 <style>
-body{
+body {
     font-family: Arial, sans-serif;
-    margin:0;
-    padding:20px;
-    font-size:20px;
-    background:#f6f8fb;
-    color:#1b1f23;
+    margin: 0;
+    padding: 20px;
+    font-size: 18px;
+    background-color: #f7f9fb;
 }
 
-h1{
-    font-size:28px;
+h1 {
+    margin-bottom: 10px;
 }
 
-h2{
-    margin-top:10px;
+.intro {
+    background-color: #e3f2fd;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    line-height: 1.6;
 }
 
-.intro{
-    background:#e8f1ff;
-    padding:16px;
-    border-radius:12px;
-    margin-bottom:20px;
-    line-height:1.5;
+#calendar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
 }
 
-.dashboard{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:12px;
+.day {
+    border: 2px solid #d0d7de;
+    padding: 15px;
+    border-radius: 12px;
+    background-color: white;
+    transition: 0.2s;
 }
 
-.week-card{
-    background:white;
-    border:2px solid #d0d7de;
-    border-radius:12px;
-    padding:14px;
-    cursor:pointer;
-    transition:0.2s;
+.day.complete {
+    background-color: #d4edda;
 }
 
-.week-card:hover{
-    transform:translateY(-2px);
+.task {
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: #eef3f8;
+    transition: 0.2s;
 }
 
-.progress-bar{
-    height:10px;
-    background:#e1e4e8;
-    border-radius:6px;
-    overflow:hidden;
-    margin-top:8px;
+.task:hover {
+    background-color: #dde7f0;
 }
 
-.progress-fill{
-    height:100%;
-    background:#2ea44f;
-    width:0%;
+.task.complete {
+    background-color: #a5d6a7;
 }
 
-button{
-    padding:10px 14px;
-    font-size:16px;
-    border:none;
-    border-radius:8px;
-    background:#0969da;
-    color:white;
-    cursor:pointer;
-    margin:5px 5px 10px 0;
+.rating span {
+    margin-left: 6px;
+    cursor: pointer;
+    font-size: 20px;
 }
 
-button:hover{
-    background:#0550ae;
+.rating span.selected {
+    font-weight: bold;
 }
 
-.day{
-    background:white;
-    border-radius:12px;
-    padding:12px;
-    margin-bottom:12px;
-    border:2px solid #d0d7de;
+.controls {
+    margin: 15px 0;
 }
 
-.task{
-    background:#f2f6fb;
-    padding:10px;
-    margin:8px 0;
-    border-radius:10px;
-    cursor:pointer;
+button {
+    padding: 10px 15px;
+    font-size: 16px;
+    margin-right: 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background-color: #1976d2;
+    color: white;
+    transition: 0.2s;
 }
 
-.task.done{
-    background:#b7e4c7;
+button:hover {
+    background-color: #1565c0;
 }
 
-.rating span{
-    font-size:22px;
-    margin-left:8px;
-    cursor:pointer;
-    opacity:0.4;
-}
-
-.rating span.active{
-    opacity:1;
-}
-
-.small{
-    font-size:16px;
-    color:#57606a;
-}
-
-.hidden{
-    display:none;
-}
-
-#topbar{
-    margin-bottom:10px;
+#progress, #streak {
+    font-weight: bold;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🧠 CVA Journey App</h1>
+<h1 id="phase"></h1>
 
 <div class="intro">
-Deze app helpt je stap voor stap herstellen na een CVA.<br>
-Je werkt dagelijks aan oefeningen om zelfstandigheid, conditie en ADL-functie te verbeteren.
+    <strong>Wat is dit?</strong><br>
+    Deze app helpt je stap voor stap herstellen na een CVA.<br>
+    Je werkt dagelijks aan oefeningen die je helpen weer zelfstandig te worden 
+    in het dagelijks leven (ADL).
 </div>
 
-<div id="dashboard"></div>
-
-<div id="view" class="hidden">
-
-<div id="topbar">
-<button onclick="backToDashboard()">← Dashboard</button>
+<div class="controls">
+    <button onclick="prevWeek()">← Vorige</button>
+    <button onclick="nextWeek()">Volgende →</button>
 </div>
-
-<h2 id="weekTitle"></h2>
-<p id="weekGoal" class="small"></p>
 
 <p id="progress"></p>
 <p id="streak"></p>
 
-<div id="days"></div>
-
-</div>
+<div id="calendar"></div>
 
 <script>
 const weeks = [
-{
-title:"Week 1-2 Mobilisatie",
-goal:"Veilig mobiliseren en ADL hervatten.",
-tasks:["Mobiliseren","Zitten/staan","ADL"]
-},
-{
-title:"Week 3 Opbouw",
-goal:"Lichte kracht en balans opbouwen.",
-tasks:["Kracht licht","Balans basis","Herhaling"]
-},
-{
-title:"Week 4 Opbouw",
-goal:"Controle en stabiliteit verbeteren.",
-tasks:["Kracht","Balans","Controle"]
-},
-{
-title:"Week 5-6 Functioneel",
-goal:"Lopen en transfers verbeteren.",
-tasks:["Traplopen","Lopen","Transfers"]
-},
-{
-title:"Week 7 Functioneel+",
-goal:"Complexere motorische taken uitvoeren.",
-tasks:["Snelheid","Dubbele taken","Coördinatie"]
-},
-{
-title:"Week 8-9 Uithouding",
-goal:"Condities opbouwen in dagelijks functioneren.",
-tasks:["Wandelen","Fietsen","Duurbelasting"]
-},
-{
-title:"Week 10 Uithouding+",
-goal:"Belastbaarheid verder vergroten.",
-tasks:["Interval","Tempo","Activiteit"]
-},
-{
-title:"Week 11 Participatie",
-goal:"Terugkeer naar werk en sociale rollen.",
-tasks:["Werk","Sociaal","Zelfstandigheid"]
-},
-{
-title:"Week 12 Borging",
-goal:"Zelfmanagement en onderhoud van niveau.",
-tasks:["Routine","Zelfmanagement","Evaluatie"]
-}
+{phase:"Week 1-2: Mobilisatie", tasks:["Mobiliseren","Zitten/staan","ADL"]},
+{phase:"Week 3: Opbouw", tasks:["Kracht licht","Balans basis","Herhaling"]},
+{phase:"Week 4: Opbouw", tasks:["Kracht","Balans","Controle"]},
+{phase:"Week 5-6: Functioneel", tasks:["Traplopen","Lopen","Transfers"]},
+{phase:"Week 7: Functioneel+", tasks:["Snelheid","Dubbele taken","Coördinatie"]},
+{phase:"Week 8-9: Uithoudingsvermogen", tasks:["Wandelen","Fietsen","Duurbelasting"]},
+{phase:"Week 10: Uithouding+", tasks:["Interval","Tempo","Activiteit"]},
+{phase:"Week 11: Participatie", tasks:["Werk","Sociaal","Zelfstandigheid"]},
+{phase:"Week 12: Borging", tasks:["Routine","Zelfmanagement","Evaluatie"]}
 ];
 
-let state = JSON.parse(localStorage.getItem("state")||"{}");
-let ratings = JSON.parse(localStorage.getItem("ratings")||"{}");
-let streak = parseInt(localStorage.getItem("streak")||"0");
-let completedDays = new Set(JSON.parse(localStorage.getItem("completedDays")||"[]"));
+let currentWeek = 0;
+let state = {};
+let ratings = {};
+let streak = 0;
+let completedDays = new Set();
 
-let currentWeek = null;
+function render() {
+    const phaseEl = document.getElementById("phase");
+    const cal = document.getElementById("calendar");
 
-function save(){
-localStorage.setItem("state",JSON.stringify(state));
-localStorage.setItem("ratings",JSON.stringify(ratings));
-localStorage.setItem("streak",streak);
-localStorage.setItem("completedDays",JSON.stringify([...completedDays]));
+    phaseEl.innerText = weeks[currentWeek].phase;
+    cal.innerHTML = "";
+
+    for(let i=0;i<7;i++){
+        const dayKey = currentWeek+"-"+i;
+        const day = document.createElement("div");
+        day.className = "day";
+
+        let allDone = true;
+
+        const title = document.createElement("b");
+        title.innerText = "Dag " + (i+1);
+        day.appendChild(title);
+
+        weeks[currentWeek].tasks.forEach((t,j)=>{
+            const key = currentWeek+"-"+i+"-"+j;
+            const done = state[key];
+
+            if(!done) allDone = false;
+
+            const task = document.createElement("div");
+            task.className = "task " + (done ? "complete" : "");
+            task.innerText = t;
+
+            task.onclick = () => {
+                state[key] = !state[key];
+                checkDayCompletion(i);
+                render();
+            };
+
+            const ratingDiv = document.createElement("div");
+            ratingDiv.className = "rating";
+            ratingDiv.innerText = "Moeite:";
+
+            ["🙂","😐","😓"].forEach((emoji,idx)=>{
+                const span = document.createElement("span");
+                span.innerText = emoji;
+
+                if(ratings[key] === idx+1){
+                    span.classList.add("selected");
+                } else {
+                    span.style.opacity = "0.4";
+                }
+
+                span.onclick = (e) => {
+                    e.stopPropagation();
+                    ratings[key] = idx+1;
+                    render();
+                };
+
+                ratingDiv.appendChild(span);
+            });
+
+            task.appendChild(ratingDiv);
+            day.appendChild(task);
+        });
+
+        if(allDone && weeks[currentWeek].tasks.length > 0){
+            day.classList.add("complete");
+        }
+
+        cal.appendChild(day);
+    }
+
+    updateProgress();
+    document.getElementById("streak").innerText = "🔥 Streak: " + streak + " dagen";
 }
 
-function renderDashboard(){
-let d = document.getElementById("dashboard");
-d.innerHTML="";
+function checkDayCompletion(dayIndex){
+    const dayKey = currentWeek+"-"+dayIndex;
 
-weeks.forEach((w,i)=>{
-let total=0,done=0;
+    const allDone = weeks[currentWeek].tasks.every((_,j)=>{
+        return state[currentWeek+"-"+dayIndex+"-"+j];
+    });
 
-for(let day=0;day<7;day++){
-for(let t=0;t<w.tasks.length;t++){
-let k=i+"-"+day+"-"+t;
-total++;
-if(state[k]) done++;
-}
+    if(allDone && !completedDays.has(dayKey)){
+        streak++;
+        completedDays.add(dayKey);
+    }
 }
 
-let perc = total?Math.round(done/total*100):0;
+function updateProgress(){
+    let total=0, done=0;
 
-let el = document.createElement("div");
-el.className="week-card";
-el.innerHTML=`
-<b>${w.title}</b>
-<div class="small">${perc}% voltooid</div>
-<div class="progress-bar"><div class="progress-fill" style="width:${perc}%"></div></div>
-`;
+    Object.keys(state).forEach(k=>{
+        total++;
+        if(state[k]) done++;
+    });
 
-el.onclick=()=>openWeek(i);
-
-d.appendChild(el);
-});
+    const perc = total?Math.round(done/total*100):0;
+    document.getElementById("progress").innerText="Progress: "+perc+"%";
 }
 
-function openWeek(i){
-currentWeek=i;
-document.getElementById("dashboard").classList.add("hidden");
-document.getElementById("view").classList.remove("hidden");
-
-document.getElementById("weekTitle").innerText=weeks[i].title;
-document.getElementById("weekGoal").innerText=weeks[i].goal;
-
-renderWeek();
+function nextWeek(){
+    if(currentWeek < weeks.length-1){
+        currentWeek++;
+        render();
+    }
 }
 
-function backToDashboard(){
-document.getElementById("view").classList.add("hidden");
-document.getElementById("dashboard").classList.remove("hidden");
-renderDashboard();
-save();
+function prevWeek(){
+    if(currentWeek > 0){
+        currentWeek--;
+        render();
+    }
 }
 
-function renderWeek(){
-let d=document.getElementById("days");
-d.innerHTML="";
-
-let w=weeks[currentWeek];
-
-for(let i=0;i<7;i++){
-let day=document.createElement("div");
-day.className="day";
-
-let title=document.createElement("b");
-title.innerText="Dag "+(i+1);
-day.appendChild(title);
-
-let allDone=true;
-
-w.tasks.forEach((t,j)=>{
-let k=currentWeek+"-"+i+"-"+j;
-
-let task=document.createElement("div");
-task.className="task "+(state[k]?"done":"");
-
-task.innerHTML=t;
-
-if(!state[k]) allDone=false;
-
-task.onclick=()=>{
-state[k]=!state[k];
-checkStreak(i);
-renderWeek();
-renderDashboard();
-};
-
-let rating=document.createElement("div");
-rating.className="rating";
-
-["🙂","😐","😓"].forEach((e,idx)=>{
-let s=document.createElement("span");
-s.innerText=e;
-
-if(ratings[k]==idx+1) s.classList.add("active");
-
-s.onclick=(ev)=>{
-ev.stopPropagation();
-ratings[k]=idx+1;
-renderWeek();
-};
-
-rating.appendChild(s);
-});
-
-task.appendChild(rating);
-day.appendChild(task);
-});
-
-if(allDone && w.tasks.length>0){
-day.style.borderColor="#2ea44f";
-}
-
-d.appendChild(day);
-}
-updateStats();
-}
-
-function checkStreak(day){
-let key=currentWeek+"-"+day;
-
-let done = weeks[currentWeek].tasks.every((_,j)=>{
-return state[currentWeek+"-"+day+"-"+j];
-});
-
-if(done && !completedDays.has(key)){
-streak++;
-completedDays.add(key);
-save();
-}
-}
-
-function updateStats(){
-let total=0,done=0;
-
-for(let k in state){
-total++;
-if(state[k]) done++;
-}
-
-let perc=total?Math.round(done/total*100):0;
-
-document.getElementById("progress").innerText="Totale progressie: "+perc+"%";
-document.getElementById("streak").innerText="🔥 Streak: "+streak+" dagen";
-}
-
-renderDashboard();
+window.onload = render;
 </script>
 
 </body>
